@@ -81,36 +81,31 @@
   }
 
   // ---------- Katalis ----------
-  function buatKatalis(w) {
+    function buatKatalis(w) {
     w.katalis = [];
     if (!w.punyaKatalis) return;
 
-    // Susun 3 permukaan katalis di posisi segitiga
     const cx = w.lebar / 2;
     const cy = w.tinggi / 2;
     const offset = Math.min(w.lebar, w.tinggi) * 0.20;
+    const KEC_KATALIS = 0.15;   // ⭐ atur kecepatan katalis di sini (px/frame)
 
-    w.katalis.push({
-      x: cx,
-      y: cy - offset,
-      radius: RADIUS_KATALIS,
-      cooldown: 0,
-      partikelTerAdsorpsi: []      // daftar partikel yang menempel
-    });
-    w.katalis.push({
-      x: cx - offset,
-      y: cy + offset * 0.7,
-      radius: RADIUS_KATALIS,
-      cooldown: 0,
-      partikelTerAdsorpsi: []
-    });
-    w.katalis.push({
-      x: cx + offset,
-      y: cy + offset * 0.7,
-      radius: RADIUS_KATALIS,
-      cooldown: 0,
-      partikelTerAdsorpsi: []
-    });
+    const posisiAwal = [
+      { x: cx,           y: cy - offset        },
+      { x: cx - offset,  y: cy + offset * 0.7  },
+      { x: cx + offset,  y: cy + offset * 0.7  }
+    ];
+
+    for (const pos of posisiAwal) {
+      const sudut = Math.random() * Math.PI * 2;
+      w.katalis.push({
+        x: pos.x, y: pos.y,
+        vx: Math.cos(sudut) * KEC_KATALIS,
+        vy: Math.sin(sudut) * KEC_KATALIS,
+        radius: RADIUS_KATALIS,
+        cooldown: 0
+      });
+    }
   }
 
   // ---------- Partikel ----------
@@ -122,14 +117,15 @@
       y: 20 + Math.random() * Math.max(1, w.tinggi - 40),
       vx: Math.cos(sudut) * kec,
       vy: Math.sin(sudut) * kec,
-      jenis,                    // 'A', 'B', 'AB'
+      jenis,
       energi: 0.3 + Math.random() * 0.7,
-      status: 'bebas',          // 'bebas', 'teradsorpsi'
-      katalisInduk: null,       // referensi ke katalis tempat menempel
+      status: 'bebas',
+      katalisInduk: null,
       sudutIkatan: 0,
-      waktuAdsorpsi: 0          // kapan mulai menempel
+      waktuAdsorpsi: 0,
+      offsetX: 0,      // ⭐ baru
+      offsetY: 0       // ⭐ baru
     };
-  }
 
   function isiWadah(w) {
     w.partikel = [];
@@ -181,7 +177,25 @@
   }
 
   // ---------- Update ----------
-  function updateWadah(w, skala, waktuSekarang) {
+     // 0. Gerak katalis (mengambang pelan)
+    for (const k of w.katalis) {
+      k.x += k.vx * skala * faktorKecepatan;
+      k.y += k.vy * skala * faktorKecepatan;
+
+      // Pantul di dinding
+      if (k.x - k.radius < 0)         { k.x = k.radius;             k.vx =  Math.abs(k.vx); }
+      if (k.x + k.radius > w.lebar)   { k.x = w.lebar - k.radius;   k.vx = -Math.abs(k.vx); }
+      if (k.y - k.radius < 0)         { k.y = k.radius;             k.vy =  Math.abs(k.vy); }
+      if (k.y + k.radius > w.tinggi)  { k.y = w.tinggi - k.radius;  k.vy = -Math.abs(k.vy); }
+    }
+
+    // Partikel yang menempel ikut bergerak bersama katalis
+    for (const p of w.partikel) {
+      if (p.status === 'teradsorpsi' && p.katalisInduk) {
+        p.x = p.katalisInduk.x + p.offsetX;
+        p.y = p.katalisInduk.y + p.offsetY;
+      }
+    }
     // 1. Gerak partikel bebas
     for (const p of w.partikel) {
       if (p.jenis === 'AB') p.sudutIkatan += 0.02 * skala;
@@ -218,6 +232,8 @@
             p.status = 'teradsorpsi';
             p.katalisInduk = k;
             p.waktuAdsorpsi = waktuSekarang;
+            p.offsetX = p.x - k.x;   // ⭐ simpan posisi relatif terhadap katalis
+            p.offsetY = p.y - k.y;
             p.vx = 0;
             p.vy = 0;
             break;
