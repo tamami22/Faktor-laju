@@ -1,6 +1,6 @@
 /* ============================================================
-   SIMULASI KATALIS — Mekanisme Adsorpsi Permukaan
-   - Katalis digambar sebagai PERMUKAAN PADAT (bukan partikel)
+   SIMULASI KATALIS — Mekanisme Adsorpsi Permukaan (Katalis Bergerak)
+   - Katalis digambar sebagai PERMUKAAN PADAT yang mengambang pelan
    - Tanpa katalis: A+B hanya bisa bereaksi jika tumbukan acak terjadi
    - Dengan katalis: A/B menempel di permukaan katalis → lebih mudah
      bertemu → reaksi terjadi di permukaan → AB lepas kembali
@@ -43,11 +43,11 @@
   const EA_TANPA = 1.55;
 
   // Katalis
-  const JUMLAH_KATALIS = 3;         // ada 3 "permukaan katalis"
-  const RADIUS_KATALIS = 34;        // radius setiap permukaan katalis
-  const JARAK_ADSORPSI = 8;         // jarak partikel menempel ke permukaan
-  const DURASI_ADSORPSI = 300;      // ms — berapa lama sebelum bisa bereaksi
-  const COOLDOWN_KATALIS = 500;     // ms — jeda setelah reaksi sebelum bisa terima lagi
+  const RADIUS_KATALIS = 34;
+  const JARAK_ADSORPSI = 8;
+  const DURASI_ADSORPSI = 300;      // ms
+  const COOLDOWN_KATALIS = 500;     // ms
+  const KEC_KATALIS = 0.15;         // ⭐ kecepatan katalis (px/frame)
 
   let berjalan = true;
   let faktorKecepatan = 1.0;
@@ -81,14 +81,13 @@
   }
 
   // ---------- Katalis ----------
-    function buatKatalis(w) {
+  function buatKatalis(w) {
     w.katalis = [];
     if (!w.punyaKatalis) return;
 
     const cx = w.lebar / 2;
     const cy = w.tinggi / 2;
     const offset = Math.min(w.lebar, w.tinggi) * 0.20;
-    const KEC_KATALIS = 0.15;   // ⭐ atur kecepatan katalis di sini (px/frame)
 
     const posisiAwal = [
       { x: cx,           y: cy - offset        },
@@ -103,7 +102,8 @@
         vx: Math.cos(sudut) * KEC_KATALIS,
         vy: Math.sin(sudut) * KEC_KATALIS,
         radius: RADIUS_KATALIS,
-        cooldown: 0
+        cooldown: 0,
+        faseGetar: Math.random() * Math.PI * 2   // supaya bentuk tidak identik
       });
     }
   }
@@ -123,9 +123,10 @@
       katalisInduk: null,
       sudutIkatan: 0,
       waktuAdsorpsi: 0,
-      offsetX: 0,      // ⭐ baru
-      offsetY: 0       // ⭐ baru
+      offsetX: 0,
+      offsetY: 0
     };
+  }
 
   function isiWadah(w) {
     w.partikel = [];
@@ -149,13 +150,11 @@
 
   // ---------- Temukan posisi adsorpsi di permukaan katalis ----------
   function posisiAdsorpsi(k, partikelLain) {
-    // Cari sudut yang tidak bertabrakan dengan partikel yang sudah teradsorpsi
     for (let attempt = 0; attempt < 20; attempt++) {
       const sudut = Math.random() * Math.PI * 2;
       const px = k.x + Math.cos(sudut) * (k.radius + JARAK_ADSORPSI);
       const py = k.y + Math.sin(sudut) * (k.radius + JARAK_ADSORPSI);
 
-      // Cek tidak bertabrakan dengan yang lain
       let ok = true;
       for (const other of partikelLain) {
         if (other.status !== 'teradsorpsi') continue;
@@ -167,7 +166,6 @@
       }
       if (ok) return { x: px, y: py, sudut };
     }
-    // Fallback
     const sudut = Math.random() * Math.PI * 2;
     return {
       x: k.x + Math.cos(sudut) * (k.radius + JARAK_ADSORPSI),
@@ -176,8 +174,12 @@
     };
   }
 
-  // ---------- Update ----------
-     // 0. Gerak katalis (mengambang pelan)
+  // ============================================================
+  //  UPDATE
+  // ============================================================
+  function updateWadah(w, skala, waktuSekarang) {
+
+    // 0. Gerak katalis (mengambang pelan)
     for (const k of w.katalis) {
       k.x += k.vx * skala * faktorKecepatan;
       k.y += k.vy * skala * faktorKecepatan;
@@ -196,16 +198,16 @@
         p.y = p.katalisInduk.y + p.offsetY;
       }
     }
+
     // 1. Gerak partikel bebas
     for (const p of w.partikel) {
       if (p.jenis === 'AB') p.sudutIkatan += 0.02 * skala;
 
-      if (p.status === 'teradsorpsi') continue;   // yang menempel diam
+      if (p.status === 'teradsorpsi') continue;
 
       p.x += p.vx * skala * faktorKecepatan;
       p.y += p.vy * skala * faktorKecepatan;
 
-      // Bounce dinding
       if (p.x - R_PARTIKEL < 0)         { p.x = R_PARTIKEL;             p.vx =  Math.abs(p.vx); }
       if (p.x + R_PARTIKEL > w.lebar)   { p.x = w.lebar - R_PARTIKEL;   p.vx = -Math.abs(p.vx); }
       if (p.y - R_PARTIKEL < 0)         { p.y = R_PARTIKEL;             p.vy =  Math.abs(p.vy); }
@@ -221,7 +223,7 @@
     if (w.punyaKatalis) {
       for (const p of w.partikel) {
         if (p.status !== 'bebas') continue;
-        if (p.jenis === 'AB') continue;   // produk langsung lepas, tidak menempel
+        if (p.jenis === 'AB') continue;
 
         for (const k of w.katalis) {
           if (k.cooldown > 0) continue;
@@ -232,7 +234,7 @@
             p.status = 'teradsorpsi';
             p.katalisInduk = k;
             p.waktuAdsorpsi = waktuSekarang;
-            p.offsetX = p.x - k.x;   // ⭐ simpan posisi relatif terhadap katalis
+            p.offsetX = p.x - k.x;
             p.offsetY = p.y - k.y;
             p.vx = 0;
             p.vy = 0;
@@ -242,15 +244,13 @@
       }
     }
 
-    // 4. Reaksi di permukaan katalis (partikel teradsorpsi bertemu)
+    // 4. Reaksi di permukaan katalis
     if (w.punyaKatalis) {
       for (const k of w.katalis) {
         if (k.cooldown > 0) continue;
 
-        // Kumpulkan partikel teradsorpsi di katalis ini
         const terAdsorpsi = w.partikel.filter(p => p.status === 'teradsorpsi' && p.katalisInduk === k);
 
-        // Cari pasangan A-B yang sudah cukup lama menempel
         let a = null, b = null;
         for (const p of terAdsorpsi) {
           if (waktuSekarang - p.waktuAdsorpsi < DURASI_ADSORPSI) continue;
@@ -259,7 +259,6 @@
         }
 
         if (a && b) {
-          // REAKSI di permukaan katalis
           const ab = {
             x: k.x, y: k.y,
             vx: (Math.random() - 0.5) * 1.2,
@@ -269,10 +268,11 @@
             status: 'bebas',
             katalisInduk: null,
             sudutIkatan: Math.random() * Math.PI * 2,
-            waktuAdsorpsi: 0
+            waktuAdsorpsi: 0,
+            offsetX: 0,
+            offsetY: 0
           };
 
-          // Hapus a dan b, tambahkan ab
           w.partikel = w.partikel.filter(p => p !== a && p !== b);
           w.partikel.push(ab);
 
@@ -284,7 +284,7 @@
       }
     }
 
-    // 5. Reaksi langsung (tanpa katalis) — A+B bertumbukan energik
+    // 5. Reaksi langsung (tanpa katalis)
     if (!w.punyaKatalis) {
       const hapus = new Set();
       const tambah = [];
@@ -315,8 +315,11 @@
                   x: (a.x + b.x) / 2, y: (a.y + b.y) / 2,
                   vx: (a.vx + b.vx) / 2, vy: (a.vy + b.vy) / 2,
                   jenis: 'AB', energi: 0.5, status: 'bebas',
-                  katalisInduk: null, sudutIkatan: Math.atan2(b.y - a.y, b.x - a.x),
-                  waktuAdsorpsi: 0
+                  katalisInduk: null,
+                  sudutIkatan: Math.atan2(b.y - a.y, b.x - a.x),
+                  waktuAdsorpsi: 0,
+                  offsetX: 0,
+                  offsetY: 0
                 });
                 w.totalReaksi++;
                 w.riwayat.push(performance.now());
@@ -361,14 +364,15 @@
     }
   }
 
-  // ---------- Gambar wadah ----------
+  // ============================================================
+  //  GAMBAR
+  // ============================================================
   function gambarWadah(w) {
     const ctx = w.ctx;
     ctx.clearRect(0, 0, w.lebar, w.tinggi);
 
-    // 1. Gambar katalis (permukaan padat)
+    // 1. Gambar katalis
     for (const k of w.katalis) {
-      // Glow hijau bila siap menerima partikel
       if (k.cooldown <= 0) {
         const g = ctx.createRadialGradient(k.x, k.y, k.radius * 0.6, k.x, k.y, k.radius + 10);
         g.addColorStop(0, 'rgba(231, 76, 60, 0.25)');
@@ -379,12 +383,11 @@
         ctx.fill();
       }
 
-      // Bentuk katalis: tidak beraturan seperti "gelembung"
       ctx.beginPath();
       const nTitik = 12;
       for (let i = 0; i <= nTitik; i++) {
         const a = (i / nTitik) * Math.PI * 2;
-        const r = k.radius * (0.85 + 0.15 * Math.sin(a * 3 + k.x));
+        const r = k.radius * (0.85 + 0.15 * Math.sin(a * 3 + k.faseGetar));
         const px = k.x + Math.cos(a) * r;
         const py = k.y + Math.sin(a) * r;
         if (i === 0) ctx.moveTo(px, py);
@@ -394,14 +397,12 @@
       ctx.fillStyle = k.cooldown > 0 ? 'rgba(231, 76, 60, 0.5)' : WARNA_KATALIS;
       ctx.fill();
 
-      // Efek "retak" di tengah — seperti gambar referensi
       ctx.beginPath();
       ctx.arc(k.x, k.y, k.radius * 0.55, 0, Math.PI * 2);
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
       ctx.lineWidth = 1.5;
       ctx.stroke();
 
-      // Label "Katalis"
       ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
       ctx.font = 'bold 11px sans-serif';
       ctx.textAlign = 'center';
@@ -421,7 +422,6 @@
         ? `rgba(255, 107, 107, ${alpha})`
         : `rgba(69, 183, 209, ${alpha})`;
 
-      // Glow untuk yang energik
       if (p.energi > 0.6) {
         const g = ctx.createRadialGradient(p.x, p.y, R_PARTIKEL * 0.4, p.x, p.y, R_PARTIKEL + 5);
         g.addColorStop(0, `rgba(251, 191, 36, ${(p.energi - 0.4) * 0.7})`);
@@ -432,7 +432,6 @@
         ctx.fill();
       }
 
-      // Partikel yang teradsorpsi digambar dengan cincin
       if (p.status === 'teradsorpsi') {
         ctx.beginPath();
         ctx.arc(p.x, p.y, R_PARTIKEL + 3, 0, Math.PI * 2);
@@ -446,7 +445,6 @@
       ctx.fillStyle = warnaDasar;
       ctx.fill();
 
-      // Kilau
       ctx.beginPath();
       ctx.arc(p.x - 2, p.y - 2, R_PARTIKEL * 0.3, 0, Math.PI * 2);
       ctx.fillStyle = `rgba(255,255,255,${0.4 + 0.35 * p.energi})`;
@@ -512,7 +510,7 @@
     return w.riwayat.length / (JENDELA_LAJU / 1000);
   }
 
-  // ---------- Diagram Profil Energi (sama seperti sebelumnya) ----------
+  // ---------- Diagram Profil Energi ----------
   function gambarEnergi() {
     const c = cvEnergi;
     const ctx = ctxEnergi;
@@ -566,7 +564,6 @@
     const xPuncakDengan = pad.kiri + plotW * 0.55;
     const xAntaraDengan = pad.kiri + plotW * 0.30;
 
-    // Garis bantu
     ctx.strokeStyle = '#DDD';
     ctx.setLineDash([4, 4]);
     ctx.lineWidth = 1;
@@ -595,7 +592,7 @@
     ctx.lineWidth = 3;
     ctx.stroke();
 
-    // Penanda Ea
+    // Ea tanpa katalis
     const xEaTanpa = pad.kiri + plotW * 0.08;
     ctx.strokeStyle = '#E74C3C';
     ctx.lineWidth = 2;
@@ -615,6 +612,7 @@
     ctx.textBaseline = 'middle';
     ctx.fillText('Ea tanpa katalis', xEaTanpa + 8, (yOf(E_REAKTAN) + yOf(E_PUNCAK_TANPA)) / 2);
 
+    // Ea dengan katalis
     const xEaDengan = pad.kiri + plotW * 0.24;
     ctx.strokeStyle = '#27AE60';
     ctx.beginPath();
