@@ -1,9 +1,5 @@
 /* ============================================================
    SIMULASI KATALIS — Mekanisme Adsorpsi Permukaan (Katalis Bergerak)
-   - Katalis digambar sebagai PERMUKAAN PADAT yang mengambang pelan
-   - Tanpa katalis: A+B hanya bisa bereaksi jika tumbukan acak terjadi
-   - Dengan katalis: A/B menempel di permukaan katalis → lebih mudah
-     bertemu → reaksi terjadi di permukaan → AB lepas kembali
    ============================================================ */
 (function () {
 
@@ -39,15 +35,13 @@
   const KEC_MAX = 1.05;
   const JENDELA_LAJU = 3000;
 
-  // Ambang energi untuk reaksi langsung (tanpa katalis)
   const EA_TANPA = 1.55;
 
-  // Katalis
   const RADIUS_KATALIS = 34;
   const JARAK_ADSORPSI = 8;
-  const DURASI_ADSORPSI = 300;      // ms
-  const COOLDOWN_KATALIS = 500;     // ms
-  const KEC_KATALIS = 0.15;         // ⭐ kecepatan katalis (px/frame)
+  const DURASI_ADSORPSI = 300;
+  const COOLDOWN_KATALIS = 500;
+  const KEC_KATALIS = 0.15;
 
   let berjalan = true;
   let faktorKecepatan = 1.0;
@@ -55,11 +49,13 @@
   // ---------- Wadah ----------
   function buatWadah(canvas, ctx, punyaKatalis) {
     return {
-      canvas, ctx,
-      lebar: 0, tinggi: 0,
+      canvas: canvas,
+      ctx: ctx,
+      lebar: 0,
+      tinggi: 0,
       partikel: [],
       katalis: [],
-      punyaKatalis,
+      punyaKatalis: punyaKatalis,
       totalReaksi: 0,
       riwayat: [],
       kilatan: [],
@@ -95,15 +91,17 @@
       { x: cx + offset,  y: cy + offset * 0.7  }
     ];
 
-    for (const pos of posisiAwal) {
+    for (let i = 0; i < posisiAwal.length; i++) {
+      const pos = posisiAwal[i];
       const sudut = Math.random() * Math.PI * 2;
       w.katalis.push({
-        x: pos.x, y: pos.y,
+        x: pos.x,
+        y: pos.y,
         vx: Math.cos(sudut) * KEC_KATALIS,
         vy: Math.sin(sudut) * KEC_KATALIS,
         radius: RADIUS_KATALIS,
         cooldown: 0,
-        faseGetar: Math.random() * Math.PI * 2   // supaya bentuk tidak identik
+        faseGetar: Math.random() * Math.PI * 2
       });
     }
   }
@@ -117,7 +115,7 @@
       y: 20 + Math.random() * Math.max(1, w.tinggi - 40),
       vx: Math.cos(sudut) * kec,
       vy: Math.sin(sudut) * kec,
-      jenis,
+      jenis: jenis,
       energi: 0.3 + Math.random() * 0.7,
       status: 'bebas',
       katalisInduk: null,
@@ -141,14 +139,13 @@
     for (let i = 0; i < N_B; i++) w.partikel.push(buatPartikel(w, 'B'));
   }
 
-  // ---------- Cek apakah partikel ada di dalam katalis ----------
+  // ---------- Utilitas katalis ----------
   function diDalamKatalis(px, py, k) {
     const dx = px - k.x;
     const dy = py - k.y;
     return Math.sqrt(dx * dx + dy * dy) < k.radius + R_PARTIKEL;
   }
 
-  // ---------- Temukan posisi adsorpsi di permukaan katalis ----------
   function posisiAdsorpsi(k, partikelLain) {
     for (let attempt = 0; attempt < 20; attempt++) {
       const sudut = Math.random() * Math.PI * 2;
@@ -156,21 +153,23 @@
       const py = k.y + Math.sin(sudut) * (k.radius + JARAK_ADSORPSI);
 
       let ok = true;
-      for (const other of partikelLain) {
+      for (let n = 0; n < partikelLain.length; n++) {
+        const other = partikelLain[n];
         if (other.status !== 'teradsorpsi') continue;
         const dx = px - other.x;
         const dy = py - other.y;
         if (dx * dx + dy * dy < (R_PARTIKEL * 2.4) * (R_PARTIKEL * 2.4)) {
-          ok = false; break;
+          ok = false;
+          break;
         }
       }
-      if (ok) return { x: px, y: py, sudut };
+      if (ok) return { x: px, y: py, sudut: sudut };
     }
     const sudut = Math.random() * Math.PI * 2;
     return {
       x: k.x + Math.cos(sudut) * (k.radius + JARAK_ADSORPSI),
       y: k.y + Math.sin(sudut) * (k.radius + JARAK_ADSORPSI),
-      sudut
+      sudut: sudut
     };
   }
 
@@ -179,20 +178,21 @@
   // ============================================================
   function updateWadah(w, skala, waktuSekarang) {
 
-    // 0. Gerak katalis (mengambang pelan)
-    for (const k of w.katalis) {
+    // 0. Gerak katalis
+    for (let i = 0; i < w.katalis.length; i++) {
+      const k = w.katalis[i];
       k.x += k.vx * skala * faktorKecepatan;
       k.y += k.vy * skala * faktorKecepatan;
 
-      // Pantul di dinding
-      if (k.x - k.radius < 0)         { k.x = k.radius;             k.vx =  Math.abs(k.vx); }
-      if (k.x + k.radius > w.lebar)   { k.x = w.lebar - k.radius;   k.vx = -Math.abs(k.vx); }
-      if (k.y - k.radius < 0)         { k.y = k.radius;             k.vy =  Math.abs(k.vy); }
-      if (k.y + k.radius > w.tinggi)  { k.y = w.tinggi - k.radius;  k.vy = -Math.abs(k.vy); }
+      if (k.x - k.radius < 0)        { k.x = k.radius;             k.vx =  Math.abs(k.vx); }
+      if (k.x + k.radius > w.lebar)  { k.x = w.lebar - k.radius;   k.vx = -Math.abs(k.vx); }
+      if (k.y - k.radius < 0)        { k.y = k.radius;             k.vy =  Math.abs(k.vy); }
+      if (k.y + k.radius > w.tinggi) { k.y = w.tinggi - k.radius;  k.vy = -Math.abs(k.vy); }
     }
 
-    // Partikel yang menempel ikut bergerak bersama katalis
-    for (const p of w.partikel) {
+    // Partikel yang menempel ikut katalis
+    for (let i = 0; i < w.partikel.length; i++) {
+      const p = w.partikel[i];
       if (p.status === 'teradsorpsi' && p.katalisInduk) {
         p.x = p.katalisInduk.x + p.offsetX;
         p.y = p.katalisInduk.y + p.offsetY;
@@ -200,32 +200,35 @@
     }
 
     // 1. Gerak partikel bebas
-    for (const p of w.partikel) {
+    for (let i = 0; i < w.partikel.length; i++) {
+      const p = w.partikel[i];
       if (p.jenis === 'AB') p.sudutIkatan += 0.02 * skala;
-
       if (p.status === 'teradsorpsi') continue;
 
       p.x += p.vx * skala * faktorKecepatan;
       p.y += p.vy * skala * faktorKecepatan;
 
-      if (p.x - R_PARTIKEL < 0)         { p.x = R_PARTIKEL;             p.vx =  Math.abs(p.vx); }
-      if (p.x + R_PARTIKEL > w.lebar)   { p.x = w.lebar - R_PARTIKEL;   p.vx = -Math.abs(p.vx); }
-      if (p.y - R_PARTIKEL < 0)         { p.y = R_PARTIKEL;             p.vy =  Math.abs(p.vy); }
-      if (p.y + R_PARTIKEL > w.tinggi)  { p.y = w.tinggi - R_PARTIKEL;  p.vy = -Math.abs(p.vy); }
+      if (p.x - R_PARTIKEL < 0)        { p.x = R_PARTIKEL;            p.vx =  Math.abs(p.vx); }
+      if (p.x + R_PARTIKEL > w.lebar)  { p.x = w.lebar - R_PARTIKEL;  p.vx = -Math.abs(p.vx); }
+      if (p.y - R_PARTIKEL < 0)        { p.y = R_PARTIKEL;            p.vy =  Math.abs(p.vy); }
+      if (p.y + R_PARTIKEL > w.tinggi) { p.y = w.tinggi - R_PARTIKEL; p.vy = -Math.abs(p.vy); }
     }
 
     // 2. Update cooldown katalis
-    for (const k of w.katalis) {
+    for (let i = 0; i < w.katalis.length; i++) {
+      const k = w.katalis[i];
       if (k.cooldown > 0) k.cooldown -= skala * 16.67;
     }
 
-    // 3. Adsorpsi: partikel bebas yang menyentuh katalis → menempel
+    // 3. Adsorpsi
     if (w.punyaKatalis) {
-      for (const p of w.partikel) {
+      for (let i = 0; i < w.partikel.length; i++) {
+        const p = w.partikel[i];
         if (p.status !== 'bebas') continue;
         if (p.jenis === 'AB') continue;
 
-        for (const k of w.katalis) {
+        for (let j = 0; j < w.katalis.length; j++) {
+          const k = w.katalis[j];
           if (k.cooldown > 0) continue;
           if (diDalamKatalis(p.x, p.y, k)) {
             const pos = posisiAdsorpsi(k, w.partikel);
@@ -246,13 +249,16 @@
 
     // 4. Reaksi di permukaan katalis
     if (w.punyaKatalis) {
-      for (const k of w.katalis) {
+      for (let j = 0; j < w.katalis.length; j++) {
+        const k = w.katalis[j];
         if (k.cooldown > 0) continue;
 
-        const terAdsorpsi = w.partikel.filter(p => p.status === 'teradsorpsi' && p.katalisInduk === k);
-
-        let a = null, b = null;
-        for (const p of terAdsorpsi) {
+        let a = null;
+        let b = null;
+        for (let i = 0; i < w.partikel.length; i++) {
+          const p = w.partikel[i];
+          if (p.status !== 'teradsorpsi') continue;
+          if (p.katalisInduk !== k) continue;
           if (waktuSekarang - p.waktuAdsorpsi < DURASI_ADSORPSI) continue;
           if (p.jenis === 'A' && !a) a = p;
           if (p.jenis === 'B' && !b) b = p;
@@ -260,7 +266,8 @@
 
         if (a && b) {
           const ab = {
-            x: k.x, y: k.y,
+            x: k.x,
+            y: k.y,
             vx: (Math.random() - 0.5) * 1.2,
             vy: (Math.random() - 0.5) * 1.2,
             jenis: 'AB',
@@ -273,7 +280,7 @@
             offsetY: 0
           };
 
-          w.partikel = w.partikel.filter(p => p !== a && p !== b);
+          w.partikel = w.partikel.filter(function (p) { return p !== a && p !== b; });
           w.partikel.push(ab);
 
           w.totalReaksi++;
@@ -284,7 +291,7 @@
       }
     }
 
-    // 5. Reaksi langsung (tanpa katalis)
+    // 5. Reaksi langsung tanpa katalis
     if (!w.punyaKatalis) {
       const hapus = new Set();
       const tambah = [];
@@ -310,11 +317,16 @@
             if (pasanganAB) {
               const totalEnergi = a.energi + b.energi;
               if (totalEnergi >= EA_TANPA) {
-                hapus.add(a); hapus.add(b);
+                hapus.add(a);
+                hapus.add(b);
                 tambah.push({
-                  x: (a.x + b.x) / 2, y: (a.y + b.y) / 2,
-                  vx: (a.vx + b.vx) / 2, vy: (a.vy + b.vy) / 2,
-                  jenis: 'AB', energi: 0.5, status: 'bebas',
+                  x: (a.x + b.x) / 2,
+                  y: (a.y + b.y) / 2,
+                  vx: (a.vx + b.vx) / 2,
+                  vy: (a.vy + b.vy) / 2,
+                  jenis: 'AB',
+                  energi: 0.5,
+                  status: 'bebas',
                   katalisInduk: null,
                   sudutIkatan: Math.atan2(b.y - a.y, b.x - a.x),
                   waktuAdsorpsi: 0,
@@ -330,8 +342,8 @@
               }
             }
 
-            // Pantulan elastis
-            const nx = dx / d, ny = dy / d;
+            const nx = dx / d;
+            const ny = dy / d;
             const tumpang = (jarakMin - d) / 2;
             a.x -= nx * tumpang; a.y -= ny * tumpang;
             b.x += nx * tumpang; b.y += ny * tumpang;
@@ -345,7 +357,7 @@
       }
 
       if (hapus.size || tambah.length) {
-        w.partikel = w.partikel.filter(p => !hapus.has(p)).concat(tambah);
+        w.partikel = w.partikel.filter(function (p) { return !hapus.has(p); }).concat(tambah);
       }
     }
 
@@ -367,12 +379,45 @@
   // ============================================================
   //  GAMBAR
   // ============================================================
+  function gambarAB(ctx, p) {
+    const cosR = Math.cos(p.sudutIkatan);
+    const sinR = Math.sin(p.sudutIkatan);
+    const off = 5;
+    const xa = p.x - cosR * off;
+    const ya = p.y - sinR * off;
+    const xb = p.x + cosR * off;
+    const yb = p.y + sinR * off;
+
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 12, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(123, 201, 111, 0.18)';
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(xa, ya, 6, 0, Math.PI * 2);
+    ctx.fillStyle = WARNA_A;
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(xb, yb, 6, 0, Math.PI * 2);
+    ctx.fillStyle = WARNA_B;
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 11, 0, Math.PI * 2);
+    ctx.strokeStyle = WARNA_AB;
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+  }
+
   function gambarWadah(w) {
     const ctx = w.ctx;
     ctx.clearRect(0, 0, w.lebar, w.tinggi);
 
-    // 1. Gambar katalis
-    for (const k of w.katalis) {
+    // Katalis
+    for (let i = 0; i < w.katalis.length; i++) {
+      const k = w.katalis[i];
+
       if (k.cooldown <= 0) {
         const g = ctx.createRadialGradient(k.x, k.y, k.radius * 0.6, k.x, k.y, k.radius + 10);
         g.addColorStop(0, 'rgba(231, 76, 60, 0.25)');
@@ -385,12 +430,12 @@
 
       ctx.beginPath();
       const nTitik = 12;
-      for (let i = 0; i <= nTitik; i++) {
-        const a = (i / nTitik) * Math.PI * 2;
+      for (let t = 0; t <= nTitik; t++) {
+        const a = (t / nTitik) * Math.PI * 2;
         const r = k.radius * (0.85 + 0.15 * Math.sin(a * 3 + k.faseGetar));
         const px = k.x + Math.cos(a) * r;
         const py = k.y + Math.sin(a) * r;
-        if (i === 0) ctx.moveTo(px, py);
+        if (t === 0) ctx.moveTo(px, py);
         else ctx.lineTo(px, py);
       }
       ctx.closePath();
@@ -410,8 +455,10 @@
       ctx.fillText('Katalis', k.x, k.y);
     }
 
-    // 2. Partikel
-    for (const p of w.partikel) {
+    // Partikel
+    for (let i = 0; i < w.partikel.length; i++) {
+      const p = w.partikel[i];
+
       if (p.jenis === 'AB') {
         gambarAB(ctx, p);
         continue;
@@ -419,12 +466,12 @@
 
       const alpha = 0.4 + 0.6 * p.energi;
       const warnaDasar = p.jenis === 'A'
-        ? `rgba(255, 107, 107, ${alpha})`
-        : `rgba(69, 183, 209, ${alpha})`;
+        ? 'rgba(255, 107, 107, ' + alpha + ')'
+        : 'rgba(69, 183, 209, ' + alpha + ')';
 
       if (p.energi > 0.6) {
         const g = ctx.createRadialGradient(p.x, p.y, R_PARTIKEL * 0.4, p.x, p.y, R_PARTIKEL + 5);
-        g.addColorStop(0, `rgba(251, 191, 36, ${(p.energi - 0.4) * 0.7})`);
+        g.addColorStop(0, 'rgba(251, 191, 36, ' + ((p.energi - 0.4) * 0.7) + ')');
         g.addColorStop(1, 'rgba(251, 191, 36, 0)');
         ctx.beginPath();
         ctx.arc(p.x, p.y, R_PARTIKEL + 5, 0, Math.PI * 2);
@@ -447,62 +494,36 @@
 
       ctx.beginPath();
       ctx.arc(p.x - 2, p.y - 2, R_PARTIKEL * 0.3, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(255,255,255,${0.4 + 0.35 * p.energi})`;
+      ctx.fillStyle = 'rgba(255, 255, 255, ' + (0.4 + 0.35 * p.energi) + ')';
       ctx.fill();
     }
 
-    // 3. Efek tumbukan gagal
-    for (const g of w.gagal) {
+    // Efek tumbukan gagal
+    for (let i = 0; i < w.gagal.length; i++) {
+      const g = w.gagal[i];
       const r = 4 + 8 * (1 - g.umur);
       ctx.beginPath();
       ctx.arc(g.x, g.y, r, 0, Math.PI * 2);
-      ctx.strokeStyle = `rgba(148, 163, 184, ${g.umur * 0.7})`;
+      ctx.strokeStyle = 'rgba(148, 163, 184, ' + (g.umur * 0.7) + ')';
       ctx.lineWidth = 1.5;
       ctx.stroke();
     }
 
-    // 4. Kilatan reaksi
-    for (const k of w.kilatan) {
+    // Kilatan reaksi
+    for (let i = 0; i < w.kilatan.length; i++) {
+      const k = w.kilatan[i];
       const r = 10 + 28 * (1 - k.umur);
       ctx.beginPath();
       ctx.arc(k.x, k.y, r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(123, 201, 111, ${k.umur * 0.5})`;
+      ctx.fillStyle = 'rgba(123, 201, 111, ' + (k.umur * 0.5) + ')';
       ctx.fill();
+
       ctx.beginPath();
       ctx.arc(k.x, k.y, r * 1.3, 0, Math.PI * 2);
-      ctx.strokeStyle = `rgba(123, 201, 111, ${k.umur * 0.9})`;
+      ctx.strokeStyle = 'rgba(123, 201, 111, ' + (k.umur * 0.9) + ')';
       ctx.lineWidth = 2.5;
       ctx.stroke();
     }
-  }
-
-  function gambarAB(ctx, p) {
-    const cosR = Math.cos(p.sudutIkatan);
-    const sinR = Math.sin(p.sudutIkatan);
-    const off = 5;
-    const xa = p.x - cosR * off;
-    const ya = p.y - sinR * off;
-    const xb = p.x + cosR * off;
-    const yb = p.y + sinR * off;
-
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, 12, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(123, 201, 111, 0.18)';
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.arc(xa, ya, 6, 0, Math.PI * 2);
-    ctx.fillStyle = WARNA_A;
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(xb, yb, 6, 0, Math.PI * 2);
-    ctx.fillStyle = WARNA_B;
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, 11, 0, Math.PI * 2);
-    ctx.strokeStyle = WARNA_AB;
-    ctx.lineWidth = 2.5;
-    ctx.stroke();
   }
 
   // ---------- Laju ----------
@@ -521,7 +542,8 @@
       c.height = rect.height * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
-    const W = rect.width, H = rect.height;
+    const W = rect.width;
+    const H = rect.height;
     const pad = { kiri: 70, kanan: 40, atas: 40, bawah: 60 };
     const plotW = W - pad.kiri - pad.kanan;
     const plotH = H - pad.atas - pad.bawah;
@@ -529,7 +551,7 @@
     ctx.clearRect(0, 0, W, H);
 
     const maxE = 10;
-    const yOf = e => pad.atas + plotH - (e / maxE) * plotH;
+    function yOf(e) { return pad.atas + plotH - (e / maxE) * plotH; }
 
     ctx.strokeStyle = '#8A8AA3';
     ctx.lineWidth = 1.5;
@@ -568,8 +590,10 @@
     ctx.setLineDash([4, 4]);
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.moveTo(x0, yOf(E_REAKTAN)); ctx.lineTo(x1, yOf(E_REAKTAN));
-    ctx.moveTo(x0, yOf(E_PRODUK));  ctx.lineTo(x1, yOf(E_PRODUK));
+    ctx.moveTo(x0, yOf(E_REAKTAN));
+    ctx.lineTo(x1, yOf(E_REAKTAN));
+    ctx.moveTo(x0, yOf(E_PRODUK));
+    ctx.lineTo(x1, yOf(E_PRODUK));
     ctx.stroke();
     ctx.setLineDash([]);
 
@@ -698,17 +722,17 @@
   }
 
   // ---------- Event ----------
-  btnPlay.addEventListener('click', () => {
+  btnPlay.addEventListener('click', function () {
     berjalan = !berjalan;
     btnPlay.textContent = berjalan ? '⏸ Pause' : '▶ Play';
   });
 
-  btnReset.addEventListener('click', () => {
+  btnReset.addEventListener('click', function () {
     isiWadah(wTanpa);
     isiWadah(wDengan);
   });
 
-  sliderKecepatan.addEventListener('input', () => {
+  sliderKecepatan.addEventListener('input', function () {
     const v = parseInt(sliderKecepatan.value, 10) / 10;
     faktorKecepatan = v;
     labelKecepatan.textContent = v.toFixed(1).replace('.', ',') + '×';
@@ -723,7 +747,7 @@
     requestAnimationFrame(loop);
   }
 
-  window.addEventListener('resize', () => {
+  window.addEventListener('resize', function () {
     aturUkuran(wTanpa);
     aturUkuran(wDengan);
     isiWadah(wTanpa);
