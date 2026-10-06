@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Konsentrasi — Lab Virtual Laju Reaksi</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body class="halaman-simulasi">
+
+  <header class="navbar">
+    <div class="nav-brand">
+      <span class="nav-logo">⚗️</span>
+      <span class="nav-title">Lab Virtual — Laju Reaksi</span>
+    </div>
+    <nav class="nav-links">
+      <a href="index.html">Beranda</a>
+      <a href="konsentrasi.html" class="aktif">Konsentrasi</a>
+      <a href="luas-permukaan.html">Luas Permukaan</a>
+      <a href="suhu.html">Suhu</a>
+      <a href="katalis.html">Katalis</a>
+    </nav>
+  </header>
+
+  <main class="simulasi-wrap">
+
+    <div class="simulasi-judul">
+      <h1>🧪 Pengaruh Konsentrasi terhadap Laju Reaksi</h1>
+      <p>Reaksi: <strong>A + B → AB</strong>. Amati seberapa cepat molekul AB terbentuk di tiap wadah.</p>
+    </div>
+
+    <!-- Legenda -->
+    <div class="legenda">
+      <span class="legenda-item">
+        <span class="bola bola-a"></span> Molekul A (pereaksi)
+      </span>
+      <span class="legenda-item">
+        <span class="bola bola-b"></span> Molekul B (pereaksi)
+      </span>
+      <span class="legenda-item">
+        <span class="ikon-ab">
+          <span class="bola bola-a"></span>
+          <span class="bola bola-b"></span>
+        </span> Molekul AB (produk)
+      </span>
+    </div>
+
+    <!-- Panel Kontrol -->
+    <div class="kontrol-panel">
+      <button id="btn-play" class="tombol-kontrol">⏸ Pause</button>
+      <button id="btn-reset" class="tombol-kontrol reset">↺ Reset</button>
+      <label class="kontrol-slider">
+        <span>Konsentrasi wadah kanan: <strong id="label-konsentrasi">1×</strong></span>
+        <input type="range" id="slider-konsentrasi" min="1" max="4" step="1" value="1">
+      </label>
+    </div>
+
+    <!-- Dua wadah -->
+    <div class="wadah-grid">
+      <div class="wadah-panel">
+        <h3>Wadah Kiri — Konsentrasi 1× (pembanding)</h3>
+        <canvas id="kanvas-kiri" class="kanvas-simulasi"></canvas>
+        <div class="statistik">
+          <div class="stat">
+            <span class="stat-label">Tumbukan Efektif</span>
+            <span class="stat-nilai" id="total-kiri">0</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Laju (tumbukan/detik)</span>
+            <span class="stat-nilai" id="laju-kiri">0.0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="wadah-panel">
+        <h3>Wadah Kanan — Konsentrasi <span id="judul-kanan">1×</span></h3>
+        <canvas id="kanvas-kanan" class="kanvas-simulasi"></canvas>
+        <div class="statistik">
+          <div class="stat">
+            <span class="stat-label">Tumbukan Efektif</span>
+            <span class="stat-nilai" id="total-kanan">0</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Laju (tumbukan/detik)</span>
+            <span class="stat-nilai" id="laju-kanan">0.0</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grafik -->
+    <div class="grafik-panel">
+      <h3>📈 Grafik: Laju Awal Reaksi vs Konsentrasi</h3>
+      <canvas id="kanvas-grafik"></canvas>
+    </div>
+
+    <!-- Kesimpulan -->
+    <div class="kesimpulan">
+      <h3>✅ Kesimpulan</h3>
+      <p>Semakin besar <strong>konsentrasi</strong>, semakin banyak partikel dalam ruang yang sama.
+      Akibatnya partikel lebih sering bertumbukan, sehingga <strong>laju reaksi meningkat</strong> —
+      molekul AB terbentuk lebih cepat.</p>
+    </div>
+
+    <!-- Catatan simulasi -->
+    <div class="kotak-info" style="margin-bottom:20px;">
+      <strong>📌 Catatan simulasi:</strong>
+      Reaksi <strong>A + B → AB</strong> berlangsung satu arah. Ketika semua pereaksi (A dan B)
+      sudah habis bereaksi, tidak ada lagi tumbukan efektif dan reaksi berhenti. Tekan
+      <strong>↺ Reset</strong> untuk mengulang dari awal. Grafik merekam
+      <em>laju awal reaksi</em> (laju maksimum pada detik-detik pertama) di setiap konsentrasi.
+    </div>
+
+    <div class="peringatan">
+      <h3>⚠️ Miskonsepsi yang Perlu Dihindari</h3>
+      <ul>
+        <li>Konsentrasi <strong>tidak mengubah</strong> kecepatan gerak partikel — jumlahnya yang bertambah, bukan kecepatannya.</li>
+        <li>Konsentrasi <strong>tidak mengubah</strong> energi aktivasi.</li>
+        <li>Konsentrasi <strong>tidak mengubah</strong> ukuran partikel.</li>
+      </ul>
+    </div>
+
+  </main>
+
+  <footer class="footer">
+    <p>Laboratorium Virtual Laju Reaksi — untuk pembelajaran Kimia Kelas XI SMA</p>
+  </footer>
+
+  <script src="js/konsentrasi.js"></script>
+</body>
+</html>

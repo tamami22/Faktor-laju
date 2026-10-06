@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suhu — Lab Virtual Laju Reaksi</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body class="halaman-simulasi">
+
+  <header class="navbar">
+    <div class="nav-brand">
+      <span class="nav-logo">⚗️</span>
+      <span class="nav-title">Lab Virtual — Laju Reaksi</span>
+    </div>
+    <nav class="nav-links">
+      <a href="index.html">Beranda</a>
+      <a href="konsentrasi.html">Konsentrasi</a>
+      <a href="luas-permukaan.html">Luas Permukaan</a>
+      <a href="suhu.html" class="aktif">Suhu</a>
+      <a href="katalis.html">Katalis</a>
+    </nav>
+  </header>
+
+  <main class="simulasi-wrap">
+
+    <div class="simulasi-judul">
+      <h1>🌡️ Pengaruh Suhu terhadap Laju Reaksi</h1>
+      <p>Reaksi: <strong>A + B → AB</strong>.
+      Perhatikan mana partikel yang punya cukup energi untuk bereaksi.</p>
+    </div>
+
+    <!-- Legenda -->
+    <div class="legenda">
+      <span class="legenda-item">
+        <span class="bola bola-a"></span> A (energi rendah)
+      </span>
+      <span class="legenda-item">
+        <span class="bola bola-a" style="box-shadow:0 0 10px #FBBF24, inset -3px -3px 5px rgba(0,0,0,0.15);"></span>
+        A (energi tinggi ≥ Ea)
+      </span>
+      <span class="legenda-item">
+        <span class="bola bola-b"></span> B (energi rendah)
+      </span>
+      <span class="legenda-item">
+        <span class="bola bola-b" style="box-shadow:0 0 10px #FBBF24, inset -3px -3px 5px rgba(0,0,0,0.15);"></span>
+        B (energi tinggi ≥ Ea)
+      </span>
+      <span class="legenda-item">
+        <span class="ikon-ab">
+          <span class="bola bola-a"></span>
+          <span class="bola bola-b"></span>
+        </span> Produk AB
+      </span>
+    </div>
+
+    <!-- Kontrol -->
+    <div class="kontrol-panel">
+      <button id="btn-play" class="tombol-kontrol">⏸ Pause</button>
+      <button id="btn-reset" class="tombol-kontrol reset">↺ Reset</button>
+      <label class="kontrol-slider">
+        <span>Suhu: <strong id="label-suhu">25 °C</strong> <span id="label-kelvin" style="color:#5A5A75;">(298 K)</span></span>
+        <input type="range" id="slider-suhu" min="0" max="100" step="1" value="25">
+      </label>
+    </div>
+
+    <!-- Grid: animasi + Maxwell-Boltzmann -->
+    <div class="grid-suhu">
+
+      <div class="panel-animasi">
+        <h3>Animasi Partikel pada Suhu Sekarang</h3>
+        <canvas id="kanvas-animasi" class="kanvas-animasi"></canvas>
+        <div class="statistik-suhu">
+          <div class="stat">
+            <span class="stat-label">Partikel Energik</span>
+            <span class="stat-nilai" id="stat-energik">0%</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Tumbukan Efektif</span>
+            <span class="stat-nilai" id="stat-efektif">0</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Laju (reaksi/detik)</span>
+            <span class="stat-nilai" id="stat-laju">0.0</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Sisa A + B</span>
+            <span class="stat-nilai" id="stat-sisa">0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-mb">
+        <h3>Distribusi Maxwell-Boltzmann</h3>
+        <canvas id="kanvas-mb" class="kanvas-mb"></canvas>
+        <div class="legend-mb">
+          <span class="lm-kurva">Kurva pada suhu sekarang</span>
+          <span class="lm-area">Fraksi partikel efektif</span>
+          <span class="lm-ea">Batas energi aktivasi</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Grafik Laju vs Suhu -->
+    <div class="grafik-panel">
+      <h3>📈 Grafik: Laju Awal Reaksi vs Suhu</h3>
+      <canvas id="kanvas-grafik"></canvas>
+    </div>
+
+    <!-- Kesimpulan -->
+    <div class="kesimpulan">
+      <h3>✅ Kesimpulan</h3>
+      <p>Ketika suhu dinaikkan, terjadi <strong>dua hal sekaligus</strong>:</p>
+      <ol style="margin-left:24px; margin-top:6px;">
+        <li>Partikel bergerak lebih cepat, sehingga <strong>frekuensi tumbukan</strong> naik.</li>
+        <li>Fraksi partikel yang memiliki energi ≥ energi aktivasi (Ea) <strong>melonjak drastis</strong>.</li>
+      </ol>
+      <p style="margin-top:8px;">Efek kedua inilah yang <strong>dominan</strong> — itulah sebabnya laju reaksi
+      naik sangat tajam saat suhu dinaikkan (umumnya 2× lipat setiap kenaikan 10 °C).</p>
+    </div>
+
+    <div class="peringatan">
+      <h3>⚠️ Miskonsepsi yang Perlu Dihindari</h3>
+      <ul>
+        <li>Suhu naik <strong>bukan</strong> membuat partikel menjadi lebih besar.</li>
+        <li>Suhu naik <strong>bukan</strong> mengubah energi aktivasi (Ea tetap).</li>
+        <li>Yang berubah bukan hanya kecepatan gerak, melainkan <strong>distribusi energi</strong> partikel.</li>
+        <li>Suhu naik <strong>tidak</strong> menyebabkan semua partikel bereaksi — hanya fraksinya yang bertambah.</li>
+      </ul>
+    </div>
+
+  </main>
+
+  <footer class="footer">
+    <p>Laboratorium Virtual Laju Reaksi — untuk pembelajaran Kimia Kelas XI SMA</p>
+  </footer>
+
+  <script src="js/suhu.js"></script>
+</body>
+</html>

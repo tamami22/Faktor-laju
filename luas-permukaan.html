@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Luas Permukaan — Lab Virtual Laju Reaksi</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body class="halaman-simulasi">
+
+  <header class="navbar">
+    <div class="nav-brand">
+      <span class="nav-logo">⚗️</span>
+      <span class="nav-title">Lab Virtual — Laju Reaksi</span>
+    </div>
+    <nav class="nav-links">
+      <a href="index.html">Beranda</a>
+      <a href="konsentrasi.html">Konsentrasi</a>
+      <a href="luas-permukaan.html" class="aktif">Luas Permukaan</a>
+      <a href="suhu.html">Suhu</a>
+      <a href="katalis.html">Katalis</a>
+    </nav>
+  </header>
+
+  <main class="simulasi-wrap">
+
+    <div class="simulasi-judul">
+      <h1>🧱 Pengaruh Luas Permukaan terhadap Laju Reaksi</h1>
+      <p>Reaksi: <strong>A (padat) + B (larutan) → AB</strong>.
+      Amati bagaimana bongkahan zat padat terkikis oleh larutan.</p>
+    </div>
+
+    <!-- Legenda -->
+    <div class="legenda">
+      <span class="legenda-item">
+        <span class="bola" style="background:#9B2A2A;"></span>
+        A — zat padat (di dalam, <em>tidak terekspos</em>)
+      </span>
+      <span class="legenda-item">
+        <span class="bola" style="background:#FF6B6B; box-shadow:0 0 10px #7BC96F;"></span>
+        A terekspos (siap bereaksi)
+      </span>
+      <span class="legenda-item">
+        <span class="bola bola-b"></span>
+        B — partikel larutan
+      </span>
+      <span class="legenda-item">
+        <span class="ikon-ab">
+          <span class="bola bola-a"></span>
+          <span class="bola bola-b"></span>
+        </span> Produk AB
+      </span>
+    </div>
+
+    <!-- Kontrol -->
+    <div class="kontrol-panel">
+      <button id="btn-play" class="tombol-kontrol">⏸ Pause</button>
+      <button id="btn-reset" class="tombol-kontrol reset">↺ Reset</button>
+      <label class="kontrol-slider">
+        <span>Tingkat penghalusan wadah kanan: <strong id="label-tingkat">1× (utuh)</strong></span>
+        <input type="range" id="slider-tingkat" min="1" max="4" step="1" value="1">
+      </label>
+    </div>
+
+    <!-- Dua wadah -->
+    <div class="wadah-grid">
+      <div class="wadah-panel">
+        <h3>Wadah Kiri — Zat Padat Utuh (1 bongkah)</h3>
+        <canvas id="kanvas-kiri" class="kanvas-simulasi"></canvas>
+        <div class="label-wadah">Jumlah A: <strong>36</strong> · A terekspos: <strong id="ekspos-kiri">0</strong></div>
+        <div class="statistik">
+          <div class="stat">
+            <span class="stat-label">A tersisa</span>
+            <span class="stat-nilai" id="sisa-kiri">36</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Laju (reaksi/detik)</span>
+            <span class="stat-nilai" id="laju-kiri">0.0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="wadah-panel">
+        <h3>Wadah Kanan — <span id="judul-kanan">1 bongkah</span></h3>
+        <canvas id="kanvas-kanan" class="kanvas-simulasi"></canvas>
+        <div class="label-wadah">Jumlah A: <strong>36</strong> · A terekspos: <strong id="ekspos-kanan">0</strong></div>
+        <div class="statistik">
+          <div class="stat">
+            <span class="stat-label">A tersisa</span>
+            <span class="stat-nilai" id="sisa-kanan">36</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Laju (reaksi/detik)</span>
+            <span class="stat-nilai" id="laju-kanan">0.0</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grafik -->
+    <div class="grafik-panel">
+      <h3>📈 Grafik: Laju Awal Reaksi vs Tingkat Penghalusan</h3>
+      <canvas id="kanvas-grafik"></canvas>
+    </div>
+
+    <!-- Kesimpulan -->
+    <div class="kesimpulan">
+      <h3>✅ Kesimpulan</h3>
+      <p>Ketika zat padat <strong>dihaluskan</strong>, jumlah zatnya tetap sama — tetapi
+      <strong>permukaan yang terekspos menjadi jauh lebih luas</strong>. Akibatnya lebih banyak
+      partikel A yang bisa bertumbukan dengan partikel B, sehingga <strong>laju reaksi meningkat</strong>
+      dan produk AB terbentuk lebih cepat.</p>
+    </div>
+
+    <div class="kotak-info" style="margin-bottom:20px;">
+      <strong>📌 Catatan simulasi:</strong>
+      Bongkahan A terkikis dari luar ke dalam — setelah A di permukaan bereaksi, A di lapisan
+      bawahnya menjadi terekspos. Semua partikel A di kedua wadah berjumlah sama (36).
+      Perhatikan perbedaan waktu yang dibutuhkan sampai A habis.
+    </div>
+
+    <div class="peringatan">
+      <h3>⚠️ Miskonsepsi yang Perlu Dihindari</h3>
+      <ul>
+        <li>Menghaluskan zat padat <strong>tidak menambah jumlah zat</strong> — hanya memecah menjadi bagian lebih kecil.</li>
+        <li>Laju reaksi naik bukan karena partikel A lebih cepat atau lebih besar, tetapi karena <strong>lebih banyak A yang terekspos</strong> ke larutan.</li>
+        <li>Partikel A di <strong>dalam</strong> bongkahan tidak bisa bereaksi sampai permukaan di atasnya terkikis.</li>
+      </ul>
+    </div>
+
+  </main>
+
+  <footer class="footer">
+    <p>Laboratorium Virtual Laju Reaksi — untuk pembelajaran Kimia Kelas XI SMA</p>
+  </footer>
+
+  <script src="js/luas-permukaan.js"></script>
+</body>
+</html>

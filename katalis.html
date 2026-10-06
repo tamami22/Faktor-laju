@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Katalis — Lab Virtual Laju Reaksi</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body class="halaman-simulasi">
+
+  <header class="navbar">
+    <div class="nav-brand">
+      <span class="nav-logo">⚗️</span>
+      <span class="nav-title">Lab Virtual — Laju Reaksi</span>
+    </div>
+    <nav class="nav-links">
+      <a href="index.html">Beranda</a>
+      <a href="konsentrasi.html">Konsentrasi</a>
+      <a href="luas-permukaan.html">Luas Permukaan</a>
+      <a href="suhu.html">Suhu</a>
+      <a href="katalis.html" class="aktif">Katalis</a>
+    </nav>
+  </header>
+
+  <main class="simulasi-wrap">
+
+    <div class="simulasi-judul">
+      <h1>✨ Pengaruh Katalis terhadap Laju Reaksi</h1>
+      <p>Reaksi: <strong>A + B → AB</strong>.
+      Kedua wadah memiliki partikel dengan energi yang <em>persis sama</em> —
+      bedanya hanya ada tidaknya katalis.</p>
+    </div>
+
+    <!-- Legenda -->
+    <div class="legenda">
+      <span class="legenda-item">
+        <span class="bola bola-a"></span> Partikel A
+      </span>
+      <span class="legenda-item">
+        <span class="bola bola-b"></span> Partikel B
+      </span>
+      <span class="legenda-item">
+        <span class="bola" style="background:#FF6B6B; box-shadow:0 0 12px #FBBF24;"></span>
+        Partikel berenergi tinggi
+      </span>
+      <span class="legenda-item">
+        <span class="bola" style="background:#FFD0D0; opacity:0.7;"></span>
+        Partikel berenergi rendah
+      </span>
+      <span class="legenda-item">
+        <span class="ikon-ab">
+          <span class="bola bola-a"></span>
+          <span class="bola bola-b"></span>
+        </span> Produk AB
+      </span>
+    </div>
+
+    <!-- Kontrol -->
+    <div class="kontrol-panel">
+      <button id="btn-play" class="tombol-kontrol">⏸ Pause</button>
+      <button id="btn-reset" class="tombol-kontrol reset">↺ Reset</button>
+      <label class="kontrol-slider">
+        <span>Kecepatan simulasi:
+          <strong id="label-kecepatan">1,0×</strong></span>
+        <input type="range" id="slider-kecepatan" min="5" max="20" step="1" value="10">
+      </label>
+    </div>
+
+    <!-- Grid: 2 wadah -->
+    <div class="grid-katalis">
+
+      <div class="panel-katalis tanpa">
+        <h3>
+          TANPA Katalis
+          <span class="badge-energi badge-tinggi">Ea tinggi</span>
+        </h3>
+        <canvas id="kanvas-tanpa" class="kanvas-katalis"></canvas>
+        <div class="statistik">
+          <div class="stat">
+            <span class="stat-label">Reaksi/detik</span>
+            <span class="stat-nilai" id="laju-tanpa">0.0</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Total reaksi</span>
+            <span class="stat-nilai" id="total-tanpa">0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-katalis dengan">
+        <h3>
+          DENGAN Katalis
+          <span class="badge-energi badge-rendah">Ea rendah</span>
+        </h3>
+        <canvas id="kanvas-dengan" class="kanvas-katalis"></canvas>
+        <div class="statistik">
+          <div class="stat">
+            <span class="stat-label">Reaksi/detik</span>
+            <span class="stat-nilai" id="laju-dengan">0.0</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Total reaksi</span>
+            <span class="stat-nilai" id="total-dengan">0</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Diagram profil energi -->
+    <div class="panel-energi">
+      <h3>📊 Diagram Profil Energi Reaksi</h3>
+      <canvas id="kanvas-energi" class="kanvas-energi"></canvas>
+      <div class="legend-energi">
+        <span class="le-tanpa">Jalur tanpa katalis (Ea tinggi)</span>
+        <span class="le-dengan">Jalur dengan katalis (Ea rendah)</span>
+        <span class="le-dh">ΔH reaksi (sama di kedua jalur)</span>
+      </div>
+    </div>
+
+    <!-- Kesimpulan -->
+    <div class="kesimpulan">
+      <h3>✅ Kesimpulan</h3>
+      <p>Katalis adalah zat yang <strong>mempercepat reaksi</strong> dengan cara
+      <strong>menurunkan energi aktivasi (Ea)</strong> melalui jalur alternatif yang lebih mudah.
+      Akibatnya lebih banyak tumbukan yang efektif, sehingga laju reaksi meningkat.</p>
+      <p style="margin-top:8px;">Namun penting diingat: katalis <strong>tidak mengubah</strong>
+      ΔH reaksi, <strong>tidak menggeser</strong> posisi kesetimbangan, dan
+      <strong>tidak ikut terpakai</strong> — di akhir reaksi jumlahnya tetap sama.</p>
+    </div>
+
+    <div class="peringatan">
+      <h3>⚠️ Miskonsepsi yang Perlu Dihindari</h3>
+      <ul>
+        <li>Katalis <strong>bukan</strong> menambah energi pada partikel — energi partikel sama di kedua wadah.</li>
+        <li>Katalis <strong>bukan</strong> "dimakan" oleh reaksi — ia bisa dipakai berulang kali.</li>
+        <li>Katalis <strong>tidak menggeser</strong> kesetimbangan, hanya mempercepat tercapainya kesetimbangan.</li>
+        <li>Katalis <strong>tidak mengubah</strong> ΔH (jumlah kalor reaksi).</li>
+      </ul>
+    </div>
+
+  </main>
+
+  <footer class="footer">
+    <p>Laboratorium Virtual Laju Reaksi — untuk pembelajaran Kimia Kelas XI SMA</p>
+  </footer>
+
+  <script src="js/katalis.js"></script>
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laboratorium Virtual — Faktor Laju Reaksi</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body class="beranda">
+
+  <!-- ============ NAVBAR ============ -->
+  <header class="navbar">
+    <div class="nav-brand">
+      <span class="nav-logo">⚗️</span>
+      <span class="nav-title">Lab Virtual — Laju Reaksi</span>
+    </div>
+    <nav class="nav-links">
+      <a href="index.html" class="aktif">Beranda</a>
+      <a href="#faktor">Faktor</a>
+      <a href="#teori">Teori Tumbukan</a>
+    </nav>
+  </header>
+
+  <!-- ============ HERO ============ -->
+  <section class="hero">
+    <canvas id="kanvas-hero"></canvas>
+    <div class="hero-isi">
+      <h1>Mengapa Reaksi Kimia<br>Bisa Berjalan Cepat</span> atau Lambat</span>?</h1>
+      <p class="hero-sub">
+        Jelajahi dunia <strong>sub-mikroskopis</strong> — lihat bagaimana partikel-partikel
+        bertumbukan, kapan tumbukan menghasilkan produk, dan apa saja yang memengaruhinya.
+      </p>
+      <a href="#faktor" class="tombol-utama">🔬 Mulai Menjelajah</a>
+    </div>
+  </section>
+
+  <!-- ============ PENGANTAR TEORI TUMBUKAN ============ -->
+  <section class="seksi" id="teori">
+    <h2 class="judul-seksi">Teori Tumbukan: Kunci Segalanya</h2>
+    <p class="sub-seksi">
+      Reaksi A + B → AB hanya terjadi jika partikel A dan B <em>bertumbukan dengan tepat dan energinya cukup</em>.
+      Tidak semua tumbukan menghasilkan produk!
+    </p>
+
+    <div class="grid-syarat">
+      <div class="kartu-syarat syarat-1">
+        <div class="ikon-syarat">⚡</div>
+        <h3>Energi Cukup</h3>
+        <p>Energi tumbukan harus ≥ <strong>energi aktivasi (Ea)</strong>. Kalau kurang, partikel tidak akan bereaksi.</p>
+      </div>
+      <div class="kartu-syarat syarat-2">
+        <div class="ikon-syarat">🎯</div>
+        <h3>Orientasi Tepat</h3>
+        <p>Bagian yang bertumbukan harus pada posisi yang benar.</p>
+      </div>
+      <div class="kartu-syarat syarat-3">
+        <div class="ikon-syarat">✅</div>
+        <h3>Tumbukan Efektif</h3>
+        <p>Jika dua syarat terpenuhi, terbentuklah produk baru — inilah yang disebut tumbukan efektif.</p>
+      </div>
+    </div>
+
+    <div class="kotak-info">
+      <strong>💡 Ingat:</strong> Laju reaksi sebanding dengan jumlah tumbukan efektif per satuan waktu. Semakin banyak tumbukan efektif, semakin cepat reaksi berlangsung.
+    </div>
+  </section>
+
+  <!-- ============ 4 FAKTOR ============ -->
+  <section class="seksi seksi-faktor" id="faktor">
+    <h2 class="judul-seksi">Empat Faktor Penentu Laju Reaksi</h2>
+    <p class="sub-seksi">Klik salah satu untuk melihat animasi partikelnya.</p>
+
+    <div class="grid-faktor">
+
+      <a href="konsentrasi.html" class="kartu-faktor kartu-konsentrasi">
+        <div class="kartu-ikon">🧪</div>
+        <h3>Konsentrasi</h3>
+        <p>Semakin banyak partikel, semakin sering bertumbukan.</p>
+        <span class="kartu-panah">Buka animasi →</span>
+      </a>
+
+      <a href="luas-permukaan.html" class="kartu-faktor kartu-luas">
+        <div class="kartu-ikon">🧱</div>
+        <h3>Luas Permukaan</h3>
+        <p>Zat yang dihaluskan punya permukaan lebih luas untuk bertumbukan.</p>
+        <span class="kartu-panah">Buka animasi →</span>
+      </a>
+
+      <a href="suhu.html" class="kartu-faktor kartu-suhu">
+        <div class="kartu-ikon">🌡️</div>
+        <h3>Suhu</h3>
+        <p>Partikel bergerak lebih cepat dan lebih banyak yang bertenaga.</p>
+        <span class="kartu-panah">Buka animasi →</span>
+      </a>
+
+      <a href="katalis.html" class="kartu-faktor kartu-katalis">
+        <div class="kartu-ikon">✨</div>
+        <h3>Katalis</h3>
+        <p>Menurunkan energi aktivasi sehingga lebih banyak tumbukan berhasil.</p>
+        <span class="kartu-panah">Buka animasi →</span>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="footer">
+    <p>Laboratorium Virtual Laju Reaksi </p>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
